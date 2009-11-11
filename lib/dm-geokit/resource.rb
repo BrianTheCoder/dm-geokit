@@ -221,17 +221,4 @@ module DataMapper
       primitive Float
     end
   end
-
-  module Aggregates
-    module Model
-      def size
-        count
-      end
-    end
-    module Collection
-      def size
-        loaded? ? super : count
-      end
-    end
-  end
 end
