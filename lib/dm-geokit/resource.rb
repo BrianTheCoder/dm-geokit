@@ -11,8 +11,7 @@ module DataMapper
         return if self.included_modules.include?(DataMapper::GeoKit::InstanceMethods)
         send :include, InstanceMethods
         send :include, ::GeoKit::Mappable
-
-        property name.to_sym, String, :length => 255
+        
         property "#{name}_distance".to_sym, Float
 
         PROPERTY_NAMES.each do |p|
@@ -36,11 +35,9 @@ module DataMapper
         end
 
         define_method "#{name}" do
-          if attribute_get(name.to_sym).nil?
-            nil
-          else
-            GeographicLocation.new(name, self)
-          end
+          geo = GeographicLocation.new(name, self)
+          addy = instance_variable_get("@#{name}")
+          geo.to_s.blank? ? (addy.blank? ? nil : addy) : geo
         end
 
         define_method "#{name}=" do |value|
@@ -50,13 +47,13 @@ module DataMapper
             if auto_geocode?
               geo = ::GeoKit::Geocoders::MultiGeocoder.geocode(value)
               if geo.success?
-                attribute_set(name.to_sym, geo.full_address)
+                instance_variable_set("@#{name}_geo", geo)
                 PROPERTY_NAMES.each do |p|
                   attribute_set("#{name}_#{p}".to_sym, geo.send(p.to_sym))
                 end
               end
             else
-              attribute_set(name.to_sym, value)
+              instance_variable_set("@#{name}", value)
             end
           end
         end
@@ -192,6 +189,7 @@ module DataMapper
         end
 
         def property_to_column_name_with_distance(property, qualify, qualifier = nil)
+          DataMapper.logger.debug("property_to_column_name_with_distance: #{property.class}, #{property.type}, #{property.field}")
           if property.is_a?(DataMapper::Property) and property.type == DataMapper::Types::Distance
             property.field
           else
