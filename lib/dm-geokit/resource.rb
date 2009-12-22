@@ -94,6 +94,7 @@ module DataMapper
             query[:fields] = expand_fields(query[:fields], field, "#{sphere_distance_sql(field, origin, distance.measurement)}")
             query.delete(k)
           end
+          query[:unique] = false
           query
         end
 
