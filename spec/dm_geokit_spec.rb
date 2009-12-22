@@ -38,6 +38,11 @@ describe "dm-geokit" do
   it "should have a geocode method" do
     Location.should respond_to(:geocode)    
   end
+  
+  it "should pass validation" do
+    l = ValidatingLocation.create(:address => "1600 Pennsylvania Ave., Washington, D.C.")
+    l.valid?.should be(true)
+  end
 
   it "should have the address field return a GeographicLocation object" do
     l = Location.create(:address => "5119 NE 27th ave portland, or 97211")
@@ -59,7 +64,7 @@ describe "dm-geokit" do
       l.send("address_#{p}").should_not be(nil)
     end
   end
-
+  
   it "should convert to LatLng" do
     l = Location.create(:address => "5119 NE 27th ave portland, or 97211")
     l.address.should respond_to(:to_lat_lng)

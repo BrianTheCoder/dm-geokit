@@ -13,6 +13,16 @@ class Location
   has n, :comments
 end
 
+class ValidatingLocation
+  include DataMapper::Resource
+  include DataMapper::GeoKit
+  property :id, Serial
+  has_geographic_location :address
+  validates_with_block do
+    !self.address_full_address.blank?
+  end
+end
+
 class Comment
   include DataMapper::Resource
   property :id, Serial
